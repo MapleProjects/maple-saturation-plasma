@@ -1,88 +1,65 @@
-# Maple Saturation & Contrast Control for KDE Plasma (Wayland)
+# Maple Saturation (Plasma)
 
-A modern, native display color management utility designed to adjust screen saturation (digital vibrance) and contrast gamma curves in real-time under **KDE Plasma 6 Wayland** environments.
+Screen saturation and gamma control for **KDE Plasma 6 Wayland**, applied through ICC profiles generated at runtime with ArgyllCMS and registered through colord.
 
+Companion project for Hyprland: [maple-saturation-hyprland](https://github.com/MapleProjects/maple-saturation-hyprland).
 
-## Key Features
+## How it works
 
-- **Dynamic Color Saturation:** Smooth sliders and precise stepper controls to adjust display saturation (from grayscale to 400% vividness).
-- **Contrast Gamma Control:** Fine-tune contrast gamma curves dynamically to enhance readability, contrast, and depth.
-- **KWin Wayland Native integration:** Uses native ArgyllCMS and colord pipelines via `kscreen-doctor` to avoid lagging external overlays or heavy GPU filters.
-- **Alternating Double-Profile Cache:** Dynamically cycles between two fixed active profiles (`maple_active_a.icc` and `maple_active_b.icc`) to bypass KWin color cache limitations in real-time, preventing temporary file build-up.
-- **Modern Premium Design System:** Gorgeous, cohesive dark-mode user interface utilizing custom HSL palettes, smooth micro-interactions, and step adjustments.
-- **Startup Restore Support:** Runs seamlessly in the background or applies saved configurations instantly at system login via the `--apply` CLI parameter.
+1. `kscreen-doctor -j` lists connected, enabled outputs.
+2. `colormgr` registers the display as a colord device if it is missing.
+3. The system sRGB profile is decompiled to XML with `iccToXml`.
+4. Saturation and gamma are written into the profile.
+5. `iccFromXml` compiles it back into an ICC file under `~/.local/share/icc`.
+6. `kscreen-doctor output.<name>.iccprofile.<path>` applies it.
 
----
+Two fixed filenames (`maple_active_a.icc` and `maple_active_b.icc`) are alternated on every apply. Rewriting the same path leaves KWin serving a cached profile, so the rotation forces a reload while keeping the directory to exactly two files.
 
-## Installation & Deployment
+## Features
 
-### Dependencies
+- Saturation from 0.00x (grayscale) to 4.00x, slider plus numeric field
+- Gamma curve from 0.10 to 3.00
+- Per-display selector for multi-monitor setups
+- Native KWin color pipeline, no overlays and no GPU filter chain
+- `--apply` restores the last saved values silently and exits, useful for autostart
+- Settings persist in `~/.config/maple-saturation-plasma/settings.json`
+- Dark themed interface
 
-Ensure the following packages are installed on your Arch Linux system:
-- `python` & `python-pyqt6` (App environment and GUI layer)
-- `argyllcms` & `colord` (Color management framework engines)
-- `iccxml` (ICC profile compiler toolset)
-
-### Method 1: Using the Desktop Launcher (Local)
-Run the `start_app.sh` script to automatically check/install dependencies via Pacman or your AUR helper (`yay`/`paru`) and launch the application:
-```bash
-chmod +x start_app.sh
-./start_app.sh
-```
-
-### Method 2: System-wide AUR Installation (Local Test Build)
-You can compile and build the package locally using the provided standard Arch Linux `PKGBUILD` recipe:
-```bash
-# Clone the directory, navigate to it, and compile the package
-makepkg -si
-```
-
----
-
-## Command Line Interface (CLI)
-
-Maple Saturation Control comes with a silent startup command that is perfect for script execution or autostart items:
+## Install
 
 ```bash
-# Instantly restore and apply your saved color parameters at system login:
-maple-saturation-control --apply
+paru -S maple-saturation-plasma-git
 ```
 
----
+## Usage
 
-## AUR Publishing Guide
-
-To publish this package onto the Arch User Repository (AUR), follow these simple steps:
-
-1. **Host Source Code on GitHub:**
-   - Create a public repository at `https://github.com/MapleProjects/Maple-SaturationControl-WaylandPlasma`.
-   - Push your script `maple_saturation_control.py` and the `MapleSaturation.desktop` file to the main branch.
-
-2. **Initialize Empty AUR Repo:**
-   - Log into your AUR account on [aur.archlinux.org](https://aur.archlinux.org/).
-   - Set up your SSH public key in your account settings.
-   - Clone the package repository (it will be empty at first):
-     ```bash
-     git clone ssh://aur@aur.archlinux.org/maple-saturation-control-git.git
-     cd maple-saturation-control-git
-     ```
-
-3. **Assemble the PKGBUILD & SRCINFO:**
-   - Copy the provided `PKGBUILD` file into the cloned `maple-saturation-control-git` directory.
-   - Run the command to generate the standard `.SRCINFO` metadata file:
-     ```bash
-     makepkg --printsrcinfo > .SRCINFO
-     ```
-
-4. **Commit & Push to AUR:**
-   - Stage and commit both files:
-     ```bash
-     git add PKGBUILD .SRCINFO
-     git commit -m "Initial release of Maple Saturation Control for Plasma Wayland"
-     git push origin master
-     ```
-
-Your package will now be searchable and ready to install by anyone using a standard AUR helper:
 ```bash
-yay -S maple-saturation-control-git
+maple-saturation-plasma          # GUI
+maple-saturation-plasma --apply  # apply saved values and exit
 ```
+
+Autostart example (`~/.config/autostart/maple-saturation-plasma.desktop`):
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=Maple Saturation (Plasma)
+Exec=maple-saturation-plasma --apply
+X-KDE-autostart-after=panel
+```
+
+## Dependencies
+
+- KDE Plasma 6 running a Wayland session, with `kscreen-doctor` available
+- `python` and `python-pyqt6`
+- `argyllcms` and `colord`
+- `iccxml` (AUR) for the `iccToXml` / `iccFromXml` converters
+
+A base sRGB profile must exist in one of the usual paths, for example `/usr/share/color/icc/colord/sRGB.icc` (provided by colord).
+
+## Limitations
+
+- There is no contrast control. The GUI group labelled "Contrast Vibrancy" only modifies the gamma curve.
+- `--apply` always targets the first detected output, not the display selected in the GUI.
+- Plasma/KWin only. On Hyprland or other compositors the colord and kscreen-doctor path does nothing.
+- Values above roughly 2.50 can clip saturated primaries.

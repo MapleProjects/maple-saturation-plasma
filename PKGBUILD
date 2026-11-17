@@ -1,33 +1,28 @@
-# Maintainer: Rick <RickStylesProyects>
-pkgname=maple-saturation-control-git
-_pkgname=Maple-SaturationControl-WaylandPlasma
-pkgver=1.0.0
+# Maintainer: MapleProjects <eportillo898v2@gmail.com>
+pkgname=maple-saturation-plasma-git
+_pkgname=maple-saturation-plasma
+pkgver=1.0.0.r0.g0000000
 pkgrel=1
-pkgdesc="A screen color saturation and contrast gamma control tool for KDE Plasma Wayland sessions."
+pkgdesc="Screen saturation and gamma control for KDE Plasma 6 Wayland via ICC profiles"
 arch=('any')
-url="https://github.com/MapleProjects/Maple-SaturationControl-WaylandPlasma"
-license=('GPL3')
+url="https://github.com/MapleProjects/maple-saturation-plasma"
+license=('GPL-3.0-only')
 depends=('python' 'python-pyqt6' 'argyllcms' 'colord' 'iccxml')
 makedepends=('git')
-provides=('maple-saturation-control')
-conflicts=('maple-saturation-control')
-source=("git+https://github.com/MapleProjects/Maple-SaturationControl-WaylandPlasma.git")
-md5sums=('SKIP')
+provides=('maple-saturation-plasma')
+conflicts=('maple-saturation-plasma')
+source=("git+https://github.com/MapleProjects/maple-saturation-plasma.git")
+sha256sums=('SKIP')
 
 pkgver() {
   cd "$srcdir/$_pkgname"
-  printf "1.0.0.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  printf "1.0.0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 package() {
   cd "$srcdir/$_pkgname"
-  
-  # Install the main Python script
-  install -Dm755 maple_saturation_control.py "$pkgdir/usr/bin/maple-saturation-control"
-  
-  # Install the .desktop entry
-  install -Dm644 MapleSaturation.desktop "$pkgdir/usr/share/applications/maple-saturation-control.desktop"
-  
-  # Update the executable path inside the installed .desktop entry to use system binary /usr/bin/maple-saturation-control
-  sed -i 's|Exec=.*|Exec=/usr/bin/maple-saturation-control|' "$pkgdir/usr/share/applications/maple-saturation-control.desktop"
+
+  install -Dm755 maple_saturation_plasma.py "$pkgdir/usr/bin/maple-saturation-plasma"
+  install -Dm644 maple-saturation-plasma.desktop "$pkgdir/usr/share/applications/maple-saturation-plasma.desktop"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
 }

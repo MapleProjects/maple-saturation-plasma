@@ -110,15 +110,20 @@ class SettingsManager:
     Manages loading and saving of visual configuration settings.
     Saves profile parameters in a standard JSON format inside the user config home.
     """
-    CONFIG_DIR = os.path.expanduser("~/.config/maple_saturation_control")
+    CONFIG_DIR = os.path.expanduser("~/.config/maple-saturation-plasma")
     CONFIG_FILE = os.path.join(CONFIG_DIR, "settings.json")
+    LEGACY_CONFIG_DIR = os.path.expanduser("~/.config/maple_saturation_control")
+    LEGACY_CONFIG_FILE = os.path.join(LEGACY_CONFIG_DIR, "settings.json")
 
     @classmethod
     def load_settings(cls):
-        if not os.path.exists(cls.CONFIG_FILE):
+        path = cls.CONFIG_FILE
+        if not os.path.exists(path) and os.path.exists(cls.LEGACY_CONFIG_FILE):
+            path = cls.LEGACY_CONFIG_FILE
+        if not os.path.exists(path):
              return {'saturation': 1.0, 'gamma': 1.0}
         try:
-            with open(cls.CONFIG_FILE, 'r') as f:
+            with open(path, 'r') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading settings: {e}")
@@ -392,7 +397,7 @@ class MainWindow(QMainWindow):
     """
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Maple Saturation Control")
+        self.setWindowTitle("Maple Saturation (Plasma)")
         self.resize(520, 480)
         self.setStyleSheet(DesignSystem.STYLESHEET)
         
@@ -404,7 +409,7 @@ class MainWindow(QMainWindow):
 
         # Header Title
         header_layout = QHBoxLayout()
-        title_label = QLabel("MAPLE SATURATION CONTROL")
+        title_label = QLabel("MAPLE SATURATION")
         title_label.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {DesignSystem.COLOR_TEXT}; letter-spacing: 2px;")
         header_layout.addWidget(title_label)
         header_layout.addStretch()
@@ -640,7 +645,7 @@ if __name__ == "__main__":
     import argparse
     
     # Configure argument parsing for silent startup options
-    parser = argparse.ArgumentParser(description="Maple Saturation Control")
+    parser = argparse.ArgumentParser(description="Maple Saturation (Plasma)")
     parser.add_argument('--apply', action='store_true', help="Apply saved configuration silently and exit")
     args = parser.parse_known_args()[0]
     

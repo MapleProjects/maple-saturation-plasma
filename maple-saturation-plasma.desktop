@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Maple Saturation (Plasma)
+GenericName=Display Color Control
+Comment=Adjust display saturation and gamma under KDE Plasma 6 Wayland
+Exec=/usr/bin/maple-saturation-plasma
+Icon=preferences-desktop-display
+Terminal=false
+Categories=Utility;Settings;HardwareSettings;
+Keywords=color;saturation;contrast;gamma;plasma;icc;
+StartupWMClass=maple-saturation-plasma

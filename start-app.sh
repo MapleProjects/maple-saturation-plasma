@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# Maple Saturation Control - Installer & Launcher
-# Automatically resolves dependencies and runs the Wayland Plasma application.
+# Maple Saturation (Plasma) - Installer & Launcher
+# Automatically resolves dependencies and runs the KDE Plasma Wayland application.
 # ==============================================================================
 
-APP_SCRIPT="./maple_saturation_control.py"
+APP_SCRIPT="$(dirname "$0")/maple_saturation_plasma.py"
 DEPS_PACMAN=("python-pyqt6" "argyllcms" "colord")
 DEPS_AUR=("iccxml")
 
-echo "=== Maple Saturation Control ==="
+echo "=== Maple Saturation (Plasma) ==="
 echo "Verifying environment dependencies..."
 
 # Install missing repository packages
@@ -50,7 +50,7 @@ install_aur_deps
 echo "Dependencies checked successfully. Launching application..."
 if [ -f "$APP_SCRIPT" ]; then
     chmod +x "$APP_SCRIPT"
-    python3 "$APP_SCRIPT"
+    python3 "$APP_SCRIPT" "$@"
 else
     echo "Error: Primary script $APP_SCRIPT not found!"
     exit 1
